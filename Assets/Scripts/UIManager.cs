@@ -13,6 +13,11 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Button startClientButton;
 
+    private void Awake()
+    {
+        Cursor.visible = true;
+    }
+
     void Start()
     {
         startServerButton.onClick.AddListener(() =>
