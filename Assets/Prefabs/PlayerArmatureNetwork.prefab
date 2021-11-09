@@ -674,7 +674,7 @@ GameObject:
   - component: {fileID: 8335753868165603120}
   - component: {fileID: 2585272405592402364}
   - component: {fileID: 2255991852033553868}
-  - component: {fileID: 2255991852033553887}
+  - component: {fileID: 8782944162090155111}
   m_Layer: 8
   m_Name: PlayerArmatureNetwork
   m_TagString: Player
@@ -902,7 +902,7 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &2255991852033553887
+--- !u!114 &8782944162090155111
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

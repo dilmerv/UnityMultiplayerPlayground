@@ -1,3 +1,4 @@
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,8 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     private Button startClientButton;
+
+    private bool clientIdSet = false;
 
     private void Awake()
     {
@@ -43,5 +46,18 @@ public class UIManager : MonoBehaviour
             else
                 Logger.Instance.LogInfo("Unable to start client...");
         });
+
+        NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
+        {
+            Logger.Instance.LogInfo($"{id} just connected...");
+
+            if (!clientIdSet)
+            {
+                var localPlayer = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject()
+                    .gameObject.GetComponentInChildren<TextMeshProUGUI>();
+                localPlayer.text = $"ClientId: {NetworkManager.Singleton.LocalClientId}";
+                clientIdSet = true;
+            }
+        };
     }
 }
