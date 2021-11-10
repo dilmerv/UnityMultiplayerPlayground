@@ -1,7 +1,5 @@
 using DilmerGames.Core.Singletons;
-using TMPro;
 using Unity.Netcode;
-using UnityEngine;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
@@ -27,13 +25,4 @@ public class PlayersManager : Singleton<PlayersManager>
             playersInGame.Value--;
         };
     }
-
-    //public override void OnNetworkSpawn()
-    //{
-    //    Logger.Instance.LogInfo("OnNetworkSpawn...");
-    //    var localPlayerGameObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-    //    var localPlayerOverlay = localPlayerGameObject.gameObject.GetComponentInChildren<TextMeshProUGUI>();
-    //    localPlayerOverlay.text = $"ClientId: {NetworkManager.Singleton.LocalClientId}";
-    //    localPlayerGameObject.transform.position = new Vector3(Random.Range(-4, 4), 0, Random.Range(-4, 4));
-    //}
 }
