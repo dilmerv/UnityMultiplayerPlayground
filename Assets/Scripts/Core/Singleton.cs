@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using UnityEngine;
 
 namespace DilmerGames.Core.Singletons
 {
-    public class Singleton<T> : MonoBehaviour
+    public class Singleton<T> : NetworkBehaviour
         where T : Component
     {
         private static T _instance;

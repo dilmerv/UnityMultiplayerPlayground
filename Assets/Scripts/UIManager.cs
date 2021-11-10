@@ -14,11 +14,19 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Button startClientButton;
 
+    [SerializeField]
+    private TextMeshProUGUI playersInGameText;
+
     private bool clientIdSet = false;
 
     private void Awake()
     {
         Cursor.visible = true;
+    }
+
+    void Update()
+    {
+        playersInGameText.text = $"Players in game: {PlayersManager.Instance.PlayersInGame}";
     }
 
     void Start()
@@ -50,14 +58,6 @@ public class UIManager : MonoBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
         {
             Logger.Instance.LogInfo($"{id} just connected...");
-
-            if (!clientIdSet)
-            {
-                var localPlayer = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject()
-                    .gameObject.GetComponentInChildren<TextMeshProUGUI>();
-                localPlayer.text = $"ClientId: {NetworkManager.Singleton.LocalClientId}";
-                clientIdSet = true;
-            }
         };
     }
 }
