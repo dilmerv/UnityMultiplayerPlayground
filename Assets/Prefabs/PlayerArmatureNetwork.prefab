@@ -671,8 +671,9 @@ GameObject:
   - component: {fileID: 4820286304567637248}
   - component: {fileID: 2255991852033553866}
   - component: {fileID: 8782944162090155111}
-  - component: {fileID: 5646554087218249736}
+  - component: {fileID: 1432740026502775988}
   - component: {fileID: 3744294913487860803}
+  - component: {fileID: 6174784278528370158}
   m_Layer: 8
   m_Name: PlayerArmatureNetwork
   m_TagString: Player
@@ -751,7 +752,7 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &5646554087218249736
+--- !u!114 &1432740026502775988
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -790,7 +791,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e63639699374a347a4ed4653143d74f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6174784278528370158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2255991852033553856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 932d691fb08fd6e46bfb8464e00e2757, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walkSpeed: 0.05
   defaultPositionRange: {x: -4, y: 4}
+  forwardPosition:
+    m_InternalValue: 0
+  backwardPosition:
+    m_InternalValue: 0
+  rightPosition:
+    m_InternalValue: 0
+  leftPosition:
+    m_InternalValue: 0
 --- !u!1 &2439462815760529262
 GameObject:
   m_ObjectHideFlags: 0
