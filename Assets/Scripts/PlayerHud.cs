@@ -28,6 +28,7 @@ public class PlayerHud : NetworkBehaviour
         if(!overlaySet && !string.IsNullOrEmpty(playerNetworkName.Value))
         {
             SetOverlay();
+            overlaySet = true;
         }
     }
 }

@@ -28,10 +28,14 @@ public class PlayerControl : NetworkBehaviour
     void Update()
     {
         if (IsServer)
+        {
             UpdateServer();
+        }
 
-        if(IsClient && IsOwner)
+        if (IsClient && IsOwner)
+        {
             UpdateClient();
+        }
     }
 
     private void UpdateServer()
