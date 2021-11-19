@@ -7,7 +7,8 @@ public class PlayerControl : NetworkBehaviour
     public enum PlayerState
     {
         Idle,
-        Walking
+        Walk,
+        ReverseWalk,
     }
 
     [SerializeField]
@@ -73,13 +74,17 @@ public class PlayerControl : NetworkBehaviour
 
     private void ClientVisuals()
     {
-        if (networkPlayerState.Value == PlayerState.Walking)
+        if (networkPlayerState.Value == PlayerState.Walk)
         {
-            animator.SetBool("Walk", true);
+            animator.SetFloat("Walk", 1);
+        }
+        else if (networkPlayerState.Value == PlayerState.ReverseWalk)
+        {
+            animator.SetFloat("Walk", -1);
         }
         else
         {
-            animator.SetBool("Walk", false);
+            animator.SetFloat("Walk", 0);
         }
     }
 
@@ -102,7 +107,11 @@ public class PlayerControl : NetworkBehaviour
 
         if (forwardInput > 0)
         {
-            UpdatePlayerStateServerRpc(PlayerState.Walking);
+            UpdatePlayerStateServerRpc(PlayerState.Walk);
+        }
+        else if (forwardInput < 0)
+        {
+            UpdatePlayerStateServerRpc(PlayerState.ReverseWalk);
         }
         else
         {
