@@ -671,6 +671,7 @@ GameObject:
   - component: {fileID: 4820286304567637248}
   - component: {fileID: 2255991852033553866}
   - component: {fileID: 8782944162090155111}
+  - component: {fileID: 6524640165081047080}
   - component: {fileID: 3744294913487860803}
   - component: {fileID: 6174784278528370158}
   m_Layer: 8
@@ -708,7 +709,7 @@ Animator:
   m_GameObject: {fileID: 2255991852033553856}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-  m_Controller: {fileID: 9100000, guid: 40db3173a05ae3242b1c182a09b0a183, type: 2}
+  m_Controller: {fileID: 9100000, guid: eec69ad5ebd7849418020db04e5ed28f, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -751,6 +752,21 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &6524640165081047080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2255991852033553856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Animator: {fileID: 4820286304567637248}
+  m_ParameterSendBits: 0
+  m_SendRate: 0.1
 --- !u!114 &3744294913487860803
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -776,9 +792,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3.5
+  rotationSpeed: 3.5
   defaultInitialPositionOnPlane: {x: -4, y: 4}
   networkPosition:
     m_InternalValue: {x: 0, y: 0, z: 0}
+  networkRotation:
+    m_InternalValue: {x: 0, y: 0, z: 0}
+  networkPlayerState:
+    m_InternalValue: 0
 --- !u!1 &2439462815760529262
 GameObject:
   m_ObjectHideFlags: 0

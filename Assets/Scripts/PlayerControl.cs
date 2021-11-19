@@ -4,6 +4,12 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 public class PlayerControl : NetworkBehaviour
 {
+    public enum PlayerState
+    {
+        Idle,
+        Walking
+    }
+
     [SerializeField]
     private float speed = 3.5f;
 
@@ -19,16 +25,21 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     private NetworkVariable<Vector3> networkRotation = new NetworkVariable<Vector3>();
 
+    [SerializeField]
+    private NetworkVariable<PlayerState> networkPlayerState = new NetworkVariable<PlayerState>();
+
     private CharacterController characterController;
 
     // client caches positions
     private Vector3 oldInputPosition = Vector3.zero;
     private Vector3 oldInputRotation = Vector3.zero;
 
+    private Animator animator;
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-
+        animator = GetComponent<Animator>();
     }
 
     void Start()
@@ -45,6 +56,7 @@ public class PlayerControl : NetworkBehaviour
         }
 
         ClientMoveAndRotate();
+        ClientVisuals();
     }
 
     private void ClientMoveAndRotate()
@@ -56,6 +68,18 @@ public class PlayerControl : NetworkBehaviour
         if(networkRotation.Value != Vector3.zero)
         {
             transform.Rotate(networkRotation.Value);
+        }
+    }
+
+    private void ClientVisuals()
+    {
+        if (networkPlayerState.Value == PlayerState.Walking)
+        {
+            animator.SetBool("Walk", true);
+        }
+        else
+        {
+            animator.SetBool("Walk", false);
         }
     }
 
@@ -75,6 +99,15 @@ public class PlayerControl : NetworkBehaviour
             oldInputPosition = inputPosition;
             UpdateClientPositionAndRotationServerRpc(inputPosition * speed, inputRotation * rotationSpeed);
         }
+
+        if (forwardInput > 0)
+        {
+            UpdatePlayerStateServerRpc(PlayerState.Walking);
+        }
+        else
+        {
+            UpdatePlayerStateServerRpc(PlayerState.Idle);
+        }
     }
 
     [ServerRpc]
@@ -82,5 +115,11 @@ public class PlayerControl : NetworkBehaviour
     {
         networkPosition.Value = newPosition;
         networkRotation.Value = newRotation;
+    }
+
+    [ServerRpc]
+    public void UpdatePlayerStateServerRpc(PlayerState state)
+    {
+        networkPlayerState.Value = state;
     }
 }
