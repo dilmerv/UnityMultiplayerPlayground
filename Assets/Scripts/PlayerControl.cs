@@ -71,7 +71,7 @@ public class PlayerControl : NetworkBehaviour
         }
         if(networkRotationDirection.Value != Vector3.zero)
         {
-            transform.Rotate(networkRotationDirection.Value, Space.Self);
+            transform.Rotate(networkRotationDirection.Value, Space.World);
         }
     }
 
