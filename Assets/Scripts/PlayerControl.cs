@@ -21,10 +21,10 @@ public class PlayerControl : NetworkBehaviour
     private Vector2 defaultInitialPositionOnPlane = new Vector2(-4, 4);
 
     [SerializeField]
-    private NetworkVariable<Vector3> networkPosition = new NetworkVariable<Vector3>();
+    private NetworkVariable<Vector3> networkPositionDirection = new NetworkVariable<Vector3>();
 
     [SerializeField]
-    private NetworkVariable<Vector3> networkRotation = new NetworkVariable<Vector3>();
+    private NetworkVariable<Vector3> networkRotationDirection = new NetworkVariable<Vector3>();
 
     [SerializeField]
     private NetworkVariable<PlayerState> networkPlayerState = new NetworkVariable<PlayerState>();
@@ -45,8 +45,11 @@ public class PlayerControl : NetworkBehaviour
 
     void Start()
     {
-        transform.position = new Vector3(Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y), 0,
-               Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y));
+        if (IsClient && IsOwner)
+        {
+            transform.position = new Vector3(Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y), 0,
+                   Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y));
+        }
     }
 
     void Update()
@@ -62,13 +65,13 @@ public class PlayerControl : NetworkBehaviour
 
     private void ClientMoveAndRotate()
     {
-        if (networkPosition.Value != Vector3.zero)
+        if (networkPositionDirection.Value != Vector3.zero)
         {
-            characterController.SimpleMove(networkPosition.Value);
+            characterController.SimpleMove(networkPositionDirection.Value);
         }
-        if(networkRotation.Value != Vector3.zero)
+        if(networkRotationDirection.Value != Vector3.zero)
         {
-            transform.Rotate(networkRotation.Value);
+            transform.Rotate(networkRotationDirection.Value, Space.Self);
         }
     }
 
@@ -122,8 +125,8 @@ public class PlayerControl : NetworkBehaviour
     [ServerRpc]
     public void UpdateClientPositionAndRotationServerRpc(Vector3 newPosition, Vector3 newRotation)
     {
-        networkPosition.Value = newPosition;
-        networkRotation.Value = newRotation;
+        networkPositionDirection.Value = newPosition;
+        networkRotationDirection.Value = newRotation;
     }
 
     [ServerRpc]
