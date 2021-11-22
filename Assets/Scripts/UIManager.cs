@@ -17,6 +17,10 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI playersInGameText;
 
+    [SerializeField]
+    private Button executePhysicsButton;
+
+    private bool hasServerStarted;
     private void Awake()
     {
         Cursor.visible = true;
@@ -57,5 +61,21 @@ public class UIManager : MonoBehaviour
         {
             Logger.Instance.LogInfo($"{id} just connected...");
         };
+
+        NetworkManager.Singleton.OnServerStarted += () =>
+        {
+            hasServerStarted = true;
+        };
+
+        executePhysicsButton.onClick.AddListener(() => 
+        {
+            if (!hasServerStarted)
+            {
+                Logger.Instance.LogWarning("Server has not started...");
+                return;
+            }
+
+            SpawnerControl.Instance.SpawnObjects();
+        });
     }
 }
