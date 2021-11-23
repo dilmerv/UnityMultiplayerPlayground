@@ -34,8 +34,6 @@ public class RelayManager : NetworkSingleton<RelayManager>
             // make code available for clients to join
             JoinCode = relayHostData.JoinCode;
 
-            //var relayJoinData = await JoinRelayServer(relayHostData.JoinCode);
-
             UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
             transport.SetRelayServerData(
                 relayHostData.IPv4Address,
@@ -45,11 +43,24 @@ public class RelayManager : NetworkSingleton<RelayManager>
                 relayHostData.ConnectionData);
 
             IsRelayAvailable = true;
+
+            JoinGame();
         }
         catch(Exception e)
         {
             Logger.Instance.LogError(e.Message);
         }
+    }
+
+    public async void JoinGame()
+    {
+        if (!IsRelayAvailable || string.IsNullOrEmpty(JoinCode))
+        {
+            Logger.Instance.LogWarning("Relay server is not available, unable to join...");
+            return;
+        }
+
+        await JoinRelayServer(JoinCode);
     }
 
     private IEnumerator CheckForRelayAvailability()

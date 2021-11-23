@@ -33,7 +33,7 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        startServerButton.onClick.AddListener(() =>
+        startServerButton?.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartServer())
                 Logger.Instance.LogInfo("Server started...");
@@ -41,7 +41,7 @@ public class UIManager : MonoBehaviour
                 Logger.Instance.LogInfo("Unable to start server...");
         });
 
-        startHostButton.onClick.AddListener(() =>
+        startHostButton?.onClick.AddListener(() =>
         {
             if(NetworkManager.Singleton.StartHost())
                 Logger.Instance.LogInfo("Host started...");
@@ -49,7 +49,7 @@ public class UIManager : MonoBehaviour
                 Logger.Instance.LogInfo("Unable to start host...");
         });
 
-        startClientButton.onClick.AddListener(() =>
+        startClientButton?.onClick.AddListener(() =>
         {
             if(NetworkManager.Singleton.StartClient())
                 Logger.Instance.LogInfo("Client started...");
