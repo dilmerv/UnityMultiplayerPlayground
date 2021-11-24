@@ -33,12 +33,14 @@ public class RelayManager : NetworkSingleton<RelayManager>
             {
                 var relayHostData = await SetupRelayServer(maxNumberOfConnections);
 
-                Logger.Instance.LogInfo($"Server Generated Join Code: {relayHostData.JoinCode}");
+                Logger.Instance.LogInfo($"Generated Join Code: {relayHostData.JoinCode}");
 
                 UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
 
                 transport.SetRelayServerData(relayHostData.IPv4Address, relayHostData.Port, relayHostData.AllocationIDBytes,
                     relayHostData.Key, relayHostData.ConnectionData);
+
+                JoinGame(relayHostData.JoinCode);
             }
         }
         catch(Exception e)
@@ -49,11 +51,20 @@ public class RelayManager : NetworkSingleton<RelayManager>
 
     public async void JoinGame(string joinCode)
     {
-        var relayJoinData = await JoinRelayServer(joinCode);
+        try
+        {
+            var relayJoinData = await JoinRelayServer(joinCode);
 
-        UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
-        transport.SetRelayServerData(relayJoinData.IPv4Address, relayJoinData.Port, relayJoinData.AllocationIDBytes,
-            relayJoinData.Key, relayJoinData.ConnectionData, relayJoinData.HostConnectionData);
+            UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
+            transport.SetRelayServerData(relayJoinData.IPv4Address, relayJoinData.Port, relayJoinData.AllocationIDBytes,
+                relayJoinData.Key, relayJoinData.ConnectionData, relayJoinData.HostConnectionData);
+
+            Logger.Instance.LogInfo($"Joined Game With Join Code: {joinCode}");
+        }
+        catch (Exception e)
+        {
+            Logger.Instance.LogError(e.Message);
+        }
     }
 
     public static async Task<RelayHostData> SetupRelayServer(int maxConnections = 2)
@@ -106,9 +117,10 @@ public class RelayManager : NetworkSingleton<RelayManager>
             AllocationIDBytes = allocation.AllocationIdBytes,
             ConnectionData = allocation.ConnectionData,
             HostConnectionData = allocation.HostConnectionData,
-            IPv4Address = allocation.RelayServer.IpV4
+            IPv4Address = allocation.RelayServer.IpV4,
+            JoinCode = joinCode
         };
-
+        
         return relayJoinData;
     }
 }
