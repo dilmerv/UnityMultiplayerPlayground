@@ -21,6 +21,7 @@ public class Logger : Singleton<Logger>
         {
             debugAreaText = GetComponent<TextMeshProUGUI>();
         }
+        debugAreaText.text = string.Empty;
     }
 
     void OnEnable()

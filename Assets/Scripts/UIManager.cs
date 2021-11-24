@@ -1,9 +1,10 @@
+using DilmerGames.Core.Singletons;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class UIManager : Singleton<UIManager>
 {
     [SerializeField]
     private Button startServerButton;
@@ -18,9 +19,16 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI playersInGameText;
 
     [SerializeField]
+    private Button joinGameButton;
+
+    [SerializeField]
+    private TMP_InputField joinCodeInput;
+
+    [SerializeField]
     private Button executePhysicsButton;
 
     private bool hasServerStarted;
+
     private void Awake()
     {
         Cursor.visible = true;
@@ -55,6 +63,15 @@ public class UIManager : MonoBehaviour
                 Logger.Instance.LogInfo("Client started...");
             else
                 Logger.Instance.LogInfo("Unable to start client...");
+        });
+
+        joinGameButton?.onClick.AddListener(() =>
+        {
+            if (joinCodeInput != null && !string.IsNullOrEmpty(joinCodeInput.text))
+            {
+                Logger.Instance.LogInfo("Joining game with join code: " + joinCodeInput.text);
+                RelayManager.Instance.JoinGame(joinCodeInput.text);
+            }
         });
 
         NetworkManager.Singleton.OnClientConnectedCallback += (id) =>

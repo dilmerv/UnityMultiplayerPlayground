@@ -1,6 +1,5 @@
 using DilmerGames.Core.Singletons;
 using System;
-using System.Collections;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Authentication;
@@ -12,40 +11,35 @@ using UnityEngine;
 
 public class RelayManager : NetworkSingleton<RelayManager>
 {
+    public enum RelayType
+    {
+        Server,
+        Client
+    }
+
+    [SerializeField]
+    private RelayType relayType = RelayType.Client;
+
     private const string ENVIRONMENT = "production";
 
     [SerializeField]
     private int maxNumberOfConnections = 10;
 
-    public bool IsRelayAvailable { get; private set; }
-
-    public string JoinCode { get; private set; }
-
     async void Awake()
     {
-        StartCoroutine(CheckForRelayAvailability());
-
         try
         {
-            Logger.Instance.LogInfo($"Setting Up Relay Server | Connections: {maxNumberOfConnections}");
+            if (relayType == RelayType.Server)
+            {
+                var relayHostData = await SetupRelayServer(maxNumberOfConnections);
 
-            var relayHostData = await SetupRelayServer(maxNumberOfConnections);
+                Logger.Instance.LogInfo($"Server Generated Join Code: {relayHostData.JoinCode}");
 
-            IsRelayAvailable = true;
+                UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
 
-            // make code available for clients to join
-            JoinCode = relayHostData.JoinCode;
-
-            var relayJoinData = await JoinRelayServer(JoinCode);
-
-            UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
-            transport.SetRelayServerData(
-                relayHostData.IPv4Address,
-                relayHostData.Port,
-                relayHostData.AllocationIDBytes,
-                relayHostData.Key,
-                relayHostData.ConnectionData,
-                relayJoinData.HostConnectionData);
+                transport.SetRelayServerData(relayHostData.IPv4Address, relayHostData.Port, relayHostData.AllocationIDBytes,
+                    relayHostData.Key, relayHostData.ConnectionData);
+            }
         }
         catch(Exception e)
         {
@@ -53,15 +47,13 @@ public class RelayManager : NetworkSingleton<RelayManager>
         }
     }
 
-    private IEnumerator CheckForRelayAvailability()
+    public async void JoinGame(string joinCode)
     {
-        while (!IsRelayAvailable)
-        {
-            yield return new WaitForSeconds(1.0f);
-            Logger.Instance.LogInfo("Checking relay availability...");
+        var relayJoinData = await JoinRelayServer(joinCode);
 
-        }
-        Logger.Instance.LogInfo("Relay is now available...");
+        UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
+        transport.SetRelayServerData(relayJoinData.IPv4Address, relayJoinData.Port, relayJoinData.AllocationIDBytes,
+            relayJoinData.Key, relayJoinData.ConnectionData, relayJoinData.HostConnectionData);
     }
 
     public static async Task<RelayHostData> SetupRelayServer(int maxConnections = 2)
@@ -73,7 +65,6 @@ public class RelayManager : NetworkSingleton<RelayManager>
 
         if (!AuthenticationService.Instance.IsSignedIn)
         {
-            Logger.Instance.LogInfo("SetupRelayServer not signed in...");
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
 
@@ -90,9 +81,6 @@ public class RelayManager : NetworkSingleton<RelayManager>
         };
 
         relayHostData.JoinCode = await Relay.Instance.GetJoinCodeAsync(relayHostData.AllocationID);
-
-        Logger.Instance.LogInfo($"SetupRelayServer join code {relayHostData.JoinCode}...");
-
         return relayHostData;
     }
 
@@ -105,7 +93,6 @@ public class RelayManager : NetworkSingleton<RelayManager>
 
         if (!AuthenticationService.Instance.IsSignedIn)
         {
-            Logger.Instance.LogInfo("JoinRelayServer not signed in...");
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
 
@@ -121,8 +108,6 @@ public class RelayManager : NetworkSingleton<RelayManager>
             HostConnectionData = allocation.HostConnectionData,
             IPv4Address = allocation.RelayServer.IpV4
         };
-
-        Logger.Instance.LogInfo($"SetupRelayServer allocation key {relayJoinData.Key}...");
 
         return relayJoinData;
     }
