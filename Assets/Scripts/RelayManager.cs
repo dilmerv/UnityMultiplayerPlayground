@@ -9,30 +9,24 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-public class RelayManager : NetworkSingleton<RelayManager>
+public class RelayManager : Singleton<RelayManager>
 {
-    public enum RelayType
-    {
-        Server,
-        Client
-    }
-
-    [SerializeField]
-    private RelayType relayType = RelayType.Client;
-
     private const string ENVIRONMENT = "production";
 
     [SerializeField]
     private int maxNumberOfConnections = 10;
 
+    public bool IsRelayEnabled => Transport != null && Transport.Protocol == UnityTransport.ProtocolType.RelayUnityTransport;
+
+    public UnityTransport Transport => NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
+
     public async Task JoinGame(string joinCode)
     {
         try
         {
-            var relayJoinData = await JoinRelayServer(joinCode);
+            RelayJoinData relayJoinData = await JoinRelayServer(joinCode);
 
-            UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
-            transport.SetRelayServerData(relayJoinData.IPv4Address, relayJoinData.Port, relayJoinData.AllocationIDBytes,
+            Transport.SetRelayServerData(relayJoinData.IPv4Address, relayJoinData.Port, relayJoinData.AllocationIDBytes,
                 relayJoinData.Key, relayJoinData.ConnectionData, relayJoinData.HostConnectionData);
 
             Logger.Instance.LogInfo($"Joined Game With Join Code: {joinCode}");
@@ -43,7 +37,7 @@ public class RelayManager : NetworkSingleton<RelayManager>
         }
     }
 
-    public static async Task<RelayHostData> SetupRelayServer(int maxConnections = 2)
+    public async Task<RelayHostData> SetupRelayServer(int maxConnections = 2)
     {
         InitializationOptions options = new InitializationOptions()
             .SetEnvironmentName(ENVIRONMENT);
@@ -71,12 +65,12 @@ public class RelayManager : NetworkSingleton<RelayManager>
         return relayHostData;
     }
 
-    public static async Task<RelayJoinData> JoinRelayServer(string joinCode)
+    public async Task<RelayJoinData> JoinRelayServer(string joinCode)
     {
         InitializationOptions options = new InitializationOptions()
             .SetEnvironmentName(ENVIRONMENT);
 
-        await UnityServices.InitializeAsync();
+        await UnityServices.InitializeAsync(options);
 
         if (!AuthenticationService.Instance.IsSignedIn)
         {
