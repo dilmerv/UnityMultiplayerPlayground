@@ -25,31 +25,7 @@ public class RelayManager : NetworkSingleton<RelayManager>
     [SerializeField]
     private int maxNumberOfConnections = 10;
 
-    async void Awake()
-    {
-        try
-        {
-            if (relayType == RelayType.Server)
-            {
-                var relayHostData = await SetupRelayServer(maxNumberOfConnections);
-
-                Logger.Instance.LogInfo($"Generated Join Code: {relayHostData.JoinCode}");
-
-                UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
-
-                transport.SetRelayServerData(relayHostData.IPv4Address, relayHostData.Port, relayHostData.AllocationIDBytes,
-                    relayHostData.Key, relayHostData.ConnectionData);
-
-                JoinGame(relayHostData.JoinCode);
-            }
-        }
-        catch(Exception e)
-        {
-            Logger.Instance.LogError(e.Message);
-        }
-    }
-
-    public async void JoinGame(string joinCode)
+    public async Task JoinGame(string joinCode)
     {
         try
         {

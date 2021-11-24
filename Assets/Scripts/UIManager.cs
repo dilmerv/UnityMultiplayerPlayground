@@ -49,16 +49,24 @@ public class UIManager : Singleton<UIManager>
                 Logger.Instance.LogInfo("Unable to start server...");
         });
 
-        startHostButton?.onClick.AddListener(() =>
+        startHostButton?.onClick.AddListener(async () =>
         {
+            var relayHostData = await RelayManager.SetupRelayServer(10);
+            Logger.Instance.LogInfo($"Generated Join Code: {relayHostData.JoinCode}");
+
+            UnityTransport transport = NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
+            transport.SetRelayServerData(relayHostData.IPv4Address, relayHostData.Port, relayHostData.AllocationIDBytes,
+                relayHostData.Key, relayHostData.ConnectionData);
+            
             if(NetworkManager.Singleton.StartHost())
                 Logger.Instance.LogInfo("Host started...");
             else
                 Logger.Instance.LogInfo("Unable to start host...");
         });
 
-        startClientButton?.onClick.AddListener(() =>
+        startClientButton?.onClick.AddListener(async () =>
         {
+            await RelayManager.Instance.JoinGame(joinCodeInput.text);
             if(NetworkManager.Singleton.StartClient())
                 Logger.Instance.LogInfo("Client started...");
             else
