@@ -10,7 +10,8 @@ using UnityEngine;
 
 public class RelayManager : Singleton<RelayManager>
 {
-    private const string ENVIRONMENT = "production";
+    [SerializeField]
+    private string environment = "production";
 
     [SerializeField]
     private int maxNumberOfConnections = 10;
@@ -24,7 +25,7 @@ public class RelayManager : Singleton<RelayManager>
         Logger.Instance.LogInfo($"Relay Server Starting With Max Connections: {maxNumberOfConnections}");
 
         InitializationOptions options = new InitializationOptions()
-            .SetEnvironmentName(ENVIRONMENT);
+            .SetEnvironmentName(environment);
 
         await UnityServices.InitializeAsync(options);
 
@@ -60,7 +61,7 @@ public class RelayManager : Singleton<RelayManager>
         Logger.Instance.LogInfo($"Client Joining Game With Join Code: {joinCode}");
 
         InitializationOptions options = new InitializationOptions()
-            .SetEnvironmentName(ENVIRONMENT);
+            .SetEnvironmentName(environment);
 
         await UnityServices.InitializeAsync(options);
 
