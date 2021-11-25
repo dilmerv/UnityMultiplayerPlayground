@@ -19,9 +19,6 @@ public class UIManager : Singleton<UIManager>
     private TextMeshProUGUI playersInGameText;
 
     [SerializeField]
-    private Button joinGameButton;
-
-    [SerializeField]
     private TMP_InputField joinCodeInput;
 
     [SerializeField]
@@ -41,6 +38,7 @@ public class UIManager : Singleton<UIManager>
 
     void Start()
     {
+        // START SERVER
         startServerButton?.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartServer())
@@ -49,31 +47,26 @@ public class UIManager : Singleton<UIManager>
                 Logger.Instance.LogInfo("Unable to start server...");
         });
 
+        // START HOST
         startHostButton?.onClick.AddListener(async () =>
         {
             // this allows the UnityMultiplayer and UnityMultiplayerRelay scene to work with and without
             // relay features - if the Unity transport is found and is relay protocol then we redirect all the 
             // traffic through the relay, else it just uses a LAN type (UNET) communication.
-            if (RelayManager.Instance.IsRelayEnabled)
-            {
-                var relayHostData = await RelayManager.Instance.SetupRelayServer(10);
-                Logger.Instance.LogInfo($"Generated Join Code: {relayHostData.JoinCode}");
+            if (RelayManager.Instance.IsRelayEnabled) 
+                await RelayManager.Instance.SetupRelay();
 
-                RelayManager.Instance.Transport
-                    .SetRelayServerData(relayHostData.IPv4Address, relayHostData.Port, relayHostData.AllocationIDBytes,
-                        relayHostData.Key, relayHostData.ConnectionData);
-            }
-
-            if(NetworkManager.Singleton.StartHost())
+            if (NetworkManager.Singleton.StartHost())
                 Logger.Instance.LogInfo("Host started...");
             else
                 Logger.Instance.LogInfo("Unable to start host...");
         });
 
+        // START CLIENT
         startClientButton?.onClick.AddListener(async () =>
         {
-            if (RelayManager.Instance.IsRelayEnabled)
-                await RelayManager.Instance.JoinGame(joinCodeInput.text);
+            if (RelayManager.Instance.IsRelayEnabled && !string.IsNullOrEmpty(joinCodeInput.text))
+                await RelayManager.Instance.JoinRelay(joinCodeInput.text);
 
             if(NetworkManager.Singleton.StartClient())
                 Logger.Instance.LogInfo("Client started...");
@@ -81,16 +74,7 @@ public class UIManager : Singleton<UIManager>
                 Logger.Instance.LogInfo("Unable to start client...");
         });
 
-        // only available if relay scene is loaded
-        joinGameButton?.onClick.AddListener(async () =>
-        {
-            if (joinCodeInput != null && !string.IsNullOrEmpty(joinCodeInput.text))
-            {
-                Logger.Instance.LogInfo("Joining game with join code: " + joinCodeInput.text);
-                await RelayManager.Instance.JoinGame(joinCodeInput.text);
-            }
-        });
-
+        // STATUS TYPE CALLBACKS
         NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
         {
             Logger.Instance.LogInfo($"{id} just connected...");
@@ -108,7 +92,6 @@ public class UIManager : Singleton<UIManager>
                 Logger.Instance.LogWarning("Server has not started...");
                 return;
             }
-
             SpawnerControl.Instance.SpawnObjects();
         });
     }
