@@ -8,6 +8,7 @@ public class PlayerControl : NetworkBehaviour
     {
         Idle,
         Walk,
+        Run,
         ReverseWalk,
     }
 
@@ -48,7 +49,7 @@ public class PlayerControl : NetworkBehaviour
         if (IsClient && IsOwner)
         {
             transform.position = new Vector3(Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y), 0,
-                   Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y));
+                   Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y));   
         }
     }
 
@@ -69,7 +70,7 @@ public class PlayerControl : NetworkBehaviour
         {
             characterController.SimpleMove(networkPositionDirection.Value);
         }
-        if(networkRotationDirection.Value != Vector3.zero)
+        if (networkRotationDirection.Value != Vector3.zero)
         {
             transform.Rotate(networkRotationDirection.Value, Space.World);
         }
@@ -80,6 +81,10 @@ public class PlayerControl : NetworkBehaviour
         if (networkPlayerState.Value == PlayerState.Walk)
         {
             animator.SetFloat("Walk", 1);
+        }
+        else if (networkPlayerState.Value == PlayerState.Run)
+        {
+            animator.SetFloat("Walk", 2);
         }
         else if (networkPlayerState.Value == PlayerState.ReverseWalk)
         {
@@ -99,18 +104,25 @@ public class PlayerControl : NetworkBehaviour
         // forward & backward direction
         Vector3 direction = transform.TransformDirection(Vector3.forward);
         float forwardInput = Input.GetAxis("Vertical");
+        if (Input.GetKey(KeyCode.LeftShift) && forwardInput > 0) forwardInput = 2;
+
         Vector3 inputPosition = direction * forwardInput;
 
-        if(oldInputPosition != inputPosition || 
+
+        if (oldInputPosition != inputPosition ||
             oldInputRotation != inputRotation)
         {
             oldInputPosition = inputPosition;
             UpdateClientPositionAndRotationServerRpc(inputPosition * speed, inputRotation * rotationSpeed);
         }
 
-        if (forwardInput > 0)
+        if (forwardInput > 0 && forwardInput <= 1)
         {
             UpdatePlayerStateServerRpc(PlayerState.Walk);
+        }
+        else if (forwardInput > 1)
+        {
+            UpdatePlayerStateServerRpc(PlayerState.Run);
         }
         else if (forwardInput < 0)
         {
