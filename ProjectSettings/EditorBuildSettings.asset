@@ -8,7 +8,16 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/BasicMultiplayer.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/BasicMultiplayerWithRelay.unity
     guid: dd16c880a7f752347ba6d6f1c0e7a79e
+  - enabled: 0
+    path: Assets/Scenes/BasicMultiplayerWithRelayClientTransform.unity
+    guid: 9e434950f749a694d8d7658ba37196e8
+  - enabled: 0
+    path: Assets/Scenes/BasicMultiplayerWithRelayClientBall.unity
+    guid: e4f5ff7f42d980b4fb49a1fc969e8698
+  - enabled: 1
+    path: Assets/Scenes/BasicMultiplayerWithRelayWithFollowCamera.unity
+    guid: 970daee330a758243b2cfb0165333b02
   m_configObjects: {}
