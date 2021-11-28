@@ -4,16 +4,11 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 public class PlayerControl : NetworkBehaviour
 {
-    public enum PlayerState
-    {
-        Idle,
-        Walk,
-        Run,
-        ReverseWalk,
-    }
+    [SerializeField]
+    private float walkSpeed = 3.5f;
 
     [SerializeField]
-    private float speed = 3.5f;
+    private float runSpeedOffset = 2.0f;
 
     [SerializeField]
     private float rotationSpeed = 3.5f;
@@ -35,6 +30,7 @@ public class PlayerControl : NetworkBehaviour
     // client caches positions
     private Vector3 oldInputPosition = Vector3.zero;
     private Vector3 oldInputRotation = Vector3.zero;
+    private PlayerState oldPlayerState = PlayerState.Idle;
 
     private Animator animator;
 
@@ -78,59 +74,43 @@ public class PlayerControl : NetworkBehaviour
 
     private void ClientVisuals()
     {
-        if (networkPlayerState.Value == PlayerState.Walk)
+        if (oldPlayerState != networkPlayerState.Value)
         {
-            animator.SetFloat("Walk", 1);
-        }
-        else if (networkPlayerState.Value == PlayerState.Run)
-        {
-            animator.SetFloat("Walk", 2);
-        }
-        else if (networkPlayerState.Value == PlayerState.ReverseWalk)
-        {
-            animator.SetFloat("Walk", -1);
-        }
-        else
-        {
-            animator.SetFloat("Walk", 0);
+            oldPlayerState = networkPlayerState.Value;
+            animator.SetTrigger($"{networkPlayerState.Value}");
         }
     }
 
     private void ClientInput()
     {
-        // y axis client rotation
+        // left & right rotation
         Vector3 inputRotation = new Vector3(0, Input.GetAxis("Horizontal"), 0);
 
         // forward & backward direction
         Vector3 direction = transform.TransformDirection(Vector3.forward);
         float forwardInput = Input.GetAxis("Vertical");
-        if (Input.GetKey(KeyCode.LeftShift) && forwardInput > 0) forwardInput = 2;
-
         Vector3 inputPosition = direction * forwardInput;
 
+        // change animation states
+        if (forwardInput == 0)
+            UpdatePlayerStateServerRpc(PlayerState.Idle);
+        if (forwardInput > 0 && forwardInput <= 1)
+            UpdatePlayerStateServerRpc(PlayerState.Walk);
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            && forwardInput > 0)
+        {
+            inputPosition = direction * runSpeedOffset;
+            UpdatePlayerStateServerRpc(PlayerState.Run);
+        }
+        if (forwardInput < 0)
+            UpdatePlayerStateServerRpc(PlayerState.ReverseWalk);
 
+        // let server know about position and rotation client changes
         if (oldInputPosition != inputPosition ||
             oldInputRotation != inputRotation)
         {
             oldInputPosition = inputPosition;
-            UpdateClientPositionAndRotationServerRpc(inputPosition * speed, inputRotation * rotationSpeed);
-        }
-
-        if (forwardInput > 0 && forwardInput <= 1)
-        {
-            UpdatePlayerStateServerRpc(PlayerState.Walk);
-        }
-        else if (forwardInput > 1)
-        {
-            UpdatePlayerStateServerRpc(PlayerState.Run);
-        }
-        else if (forwardInput < 0)
-        {
-            UpdatePlayerStateServerRpc(PlayerState.ReverseWalk);
-        }
-        else
-        {
-            UpdatePlayerStateServerRpc(PlayerState.Idle);
+            UpdateClientPositionAndRotationServerRpc(inputPosition * walkSpeed, inputRotation * rotationSpeed);
         }
     }
 

@@ -6,16 +6,11 @@ using UnityEngine;
 [RequireComponent(typeof(ClientNetworkTransform))]
 public class PlayerControlAuthorative : NetworkBehaviour
 {
-    public enum PlayerState
-    {
-        Idle,
-        Walk,
-        Run,
-        ReverseWalk,
-    }
+    [SerializeField]
+    private float walkSpeed = 3.5f;
 
     [SerializeField]
-    private float speed = 3.5f;
+    private float runSpeedOffset = 2.0f;
 
     [SerializeField]
     private float rotationSpeed = 3.5f;
@@ -29,6 +24,9 @@ public class PlayerControlAuthorative : NetworkBehaviour
     private CharacterController characterController;
 
     private Animator animator;
+
+    // client caches animation states
+    private PlayerState oldPlayerState = PlayerState.Idle;
 
     private void Awake()
     {
@@ -59,21 +57,10 @@ public class PlayerControlAuthorative : NetworkBehaviour
 
     private void ClientVisuals()
     {
-        if (networkPlayerState.Value == PlayerState.Walk)
+        if (oldPlayerState != networkPlayerState.Value)
         {
-            animator.SetFloat("Walk", 1);
-        }
-        else if (networkPlayerState.Value == PlayerState.Run)
-        {
-            animator.SetFloat("Walk", 2);
-        }
-        else if (networkPlayerState.Value == PlayerState.ReverseWalk)
-        {
-            animator.SetFloat("Walk", -1);
-        }
-        else
-        {
-            animator.SetFloat("Walk", 0);
+            oldPlayerState = networkPlayerState.Value;
+            animator.SetTrigger($"{networkPlayerState.Value}");
         }
     }
 
@@ -85,30 +72,25 @@ public class PlayerControlAuthorative : NetworkBehaviour
         // forward & backward direction
         Vector3 direction = transform.TransformDirection(Vector3.forward);
         float forwardInput = Input.GetAxis("Vertical");
-        if (Input.GetKey(KeyCode.LeftShift) && forwardInput > 0) forwardInput = 2;
-
         Vector3 inputPosition = direction * forwardInput;
 
-        // client is responsible for moving itself
-        characterController.SimpleMove(inputPosition * speed);
-        transform.Rotate(inputRotation * rotationSpeed, Space.World);
-
+        // change animation states
+        if (forwardInput == 0)
+            UpdatePlayerStateServerRpc(PlayerState.Idle);
         if (forwardInput > 0 && forwardInput <= 1)
-        {
             UpdatePlayerStateServerRpc(PlayerState.Walk);
-        }
-        else if (forwardInput > 1)
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            && forwardInput > 0)
         {
+            inputPosition = direction * runSpeedOffset;
             UpdatePlayerStateServerRpc(PlayerState.Run);
         }
-        else if (forwardInput < 0)
-        {
+        if (forwardInput < 0)
             UpdatePlayerStateServerRpc(PlayerState.ReverseWalk);
-        }
-        else
-        {
-            UpdatePlayerStateServerRpc(PlayerState.Idle);
-        }
+
+        // client is responsible for moving itself
+        characterController.SimpleMove(inputPosition * walkSpeed);
+        transform.Rotate(inputRotation * rotationSpeed, Space.World);
     }
 
     [ServerRpc]

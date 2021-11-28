@@ -819,7 +819,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82d02a395452c4f44b6f87d460322c56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3.5
+  walkSpeed: 3.5
+  runSpeedOffset: 2
   rotationSpeed: 3.5
   defaultInitialPositionOnPlane: {x: -4, y: 4}
   networkPlayerState:

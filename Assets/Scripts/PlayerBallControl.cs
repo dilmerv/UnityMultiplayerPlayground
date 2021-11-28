@@ -13,9 +13,6 @@ public class PlayerBallControl : NetworkBehaviour
     private float flySpeed = 3.5f;
 
     [SerializeField]
-    private float rotationSpeed = 3.5f;
-
-    [SerializeField]
     private Vector2 defaultInitialPositionOnPlane = new Vector2(-4, 4);
 
     private Rigidbody ballRigidBody;
