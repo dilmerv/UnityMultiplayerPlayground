@@ -77,20 +77,23 @@ public class PlayerControlAuthorative : NetworkBehaviour
         // change animation states
         if (forwardInput == 0)
             UpdatePlayerStateServerRpc(PlayerState.Idle);
-        if (forwardInput > 0 && forwardInput <= 1)
+        else if (!ActiveRunningActionKey() && forwardInput > 0 && forwardInput <= 1)
             UpdatePlayerStateServerRpc(PlayerState.Walk);
-        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-            && forwardInput > 0)
+        else if (ActiveRunningActionKey() && forwardInput > 0 && forwardInput <= 1)
         {
             inputPosition = direction * runSpeedOffset;
             UpdatePlayerStateServerRpc(PlayerState.Run);
         }
-        if (forwardInput < 0)
+        else if (forwardInput < 0)
             UpdatePlayerStateServerRpc(PlayerState.ReverseWalk);
 
         // client is responsible for moving itself
         characterController.SimpleMove(inputPosition * walkSpeed);
         transform.Rotate(inputRotation * rotationSpeed, Space.World);
+    }
+    private static bool ActiveRunningActionKey()
+    {
+        return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
     }
 
     [ServerRpc]
