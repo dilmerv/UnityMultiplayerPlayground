@@ -1,4 +1,3 @@
-using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -50,8 +49,6 @@ public class PlayerControl : NetworkBehaviour
 
     [SerializeField]
     private float minHitDistance = 1.0f;
-
-    private bool blockPunch;
 
     private void Awake()
     {
@@ -112,13 +109,6 @@ public class PlayerControl : NetworkBehaviour
         {
             Debug.DrawRay(transform.position, transform.TransformDirection(aimDirecton) * minHitDistance, Color.white);
         }
-
-        //blockPunch = true;
-
-        // only allows to raycast every other second
-        //yield return new WaitForSeconds(1.0f);
-
-        //blockPunch = false;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -217,7 +207,8 @@ public class PlayerControl : NetworkBehaviour
     [ServerRpc]
     public void UpdateHealthServerRpc(int takeAwayLife, ulong clientId)
     {
-        var clientWithDamaged = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerControl>();
+        var clientWithDamaged = NetworkManager.Singleton.ConnectedClients[clientId]
+            .PlayerObject.GetComponent<PlayerControl>();
         if(clientWithDamaged != null && clientWithDamaged.health.Value > 0)
             clientWithDamaged.health.Value -= takeAwayLife;
 
@@ -242,6 +233,7 @@ public class PlayerControl : NetworkBehaviour
     public void UpdatePlayerStateServerRpc(PlayerState state)
     {
         networkPlayerState.Value = state;
+
         if (state == PlayerState.Punch)
         {
             punchBlend.Value = Random.Range(0.0f, 1.0f);
