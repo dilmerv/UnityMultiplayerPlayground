@@ -778,7 +778,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 3.5
   runSpeedOffset: 2
-  rotationSpeed: 1.5
+  rotationSpeed: 2
   defaultInitialPositionOnPlane: {x: -4, y: 4}
   networkPositionDirection:
     m_InternalValue: {x: 0, y: 0, z: 0}
@@ -788,9 +788,11 @@ MonoBehaviour:
     m_InternalValue: 0
   punchBlend:
     m_InternalValue: 0
+  health:
+    m_InternalValue: 1000
   leftHand: {fileID: 6867047020064102711}
   rightHand: {fileID: 7564247617468009595}
-  minHitDistance: 0.2
+  minHitDistance: 0.25
 --- !u!114 &3910695511346847770
 MonoBehaviour:
   m_ObjectHideFlags: 0

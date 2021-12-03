@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -28,6 +29,9 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     private NetworkVariable<float> punchBlend = new NetworkVariable<float>();
 
+    [SerializeField]
+    private NetworkVariable<int> health = new NetworkVariable<int>(1000);
+
     private CharacterController characterController;
 
     // client caches positions
@@ -46,6 +50,8 @@ public class PlayerControl : NetworkBehaviour
 
     [SerializeField]
     private float minHitDistance = 1.0f;
+
+    private bool blockPunch;
 
     private void Awake()
     {
@@ -94,16 +100,25 @@ public class PlayerControl : NetworkBehaviour
         if (Physics.Raycast(transform.position, transform.TransformDirection(aimDirecton), out hit, minHitDistance, layerMask))
         {
             Debug.DrawRay(transform.position, transform.TransformDirection(aimDirecton) * hit.distance, Color.yellow);
-            Logger.Instance.LogInfo("Did Hit: " + hit.transform.name);
+            //Logger.Instance.LogInfo("Did Hit: " + hit.transform.name);
             var n = hit.transform.GetComponent<NetworkObject>();
-            if(n != null)
-                Logger.Instance.LogInfo("Did Hit NetworkObj: " + n.OwnerClientId);
+            if (n != null)
+            {
+                //Logger.Instance.LogInfo("Did Hit NetworkObj: " + n.OwnerClientId);
+                UpdateHealthServerRpc(1, n.OwnerClientId);
+            }
         }
         else
         {
             Debug.DrawRay(transform.position, transform.TransformDirection(aimDirecton) * minHitDistance, Color.white);
-            //Debug.Log("Did not Hit");
         }
+
+        //blockPunch = true;
+
+        // only allows to raycast every other second
+        //yield return new WaitForSeconds(1.0f);
+
+        //blockPunch = false;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -139,6 +154,7 @@ public class PlayerControl : NetworkBehaviour
                 animator.SetFloat($"{PlayerState.Punch}Blend", punchBlend.Value);
             }
         }
+
     }
 
     private void ClientInput()
@@ -196,6 +212,30 @@ public class PlayerControl : NetworkBehaviour
     {
         networkPositionDirection.Value = newPosition;
         networkRotationDirection.Value = newRotation;
+    }
+
+    [ServerRpc]
+    public void UpdateHealthServerRpc(int takeAwayLife, ulong clientId)
+    {
+        var clientWithDamaged = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerControl>();
+        if(clientWithDamaged != null && clientWithDamaged.health.Value > 0)
+            clientWithDamaged.health.Value -= takeAwayLife;
+
+        NotifyHealthChangedClientRpc(takeAwayLife, new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        });
+    }
+
+    [ClientRpc]
+    public void NotifyHealthChangedClientRpc(int takeAwayLife, ClientRpcParams clientRpcParams = default)
+    {
+        if (IsOwner) return;
+
+        Logger.Instance.LogInfo($"Client is losing {takeAwayLife} live(s)");
     }
 
     [ServerRpc]
