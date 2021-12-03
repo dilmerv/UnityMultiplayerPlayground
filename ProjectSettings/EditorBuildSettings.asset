@@ -17,7 +17,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/BasicMultiplayerWithRelayClientBall.unity
     guid: e4f5ff7f42d980b4fb49a1fc969e8698
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/BasicMultiplayerWithRelayWithFollowCamera.unity
     guid: 970daee330a758243b2cfb0165333b02
+  - enabled: 1
+    path: Assets/Scenes/DemoServerRpcAndClientRpc.unity
+    guid: 12d3d54ff99ad284d9f014341f003826
   m_configObjects: {}
