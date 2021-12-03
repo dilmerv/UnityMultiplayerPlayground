@@ -31,6 +31,16 @@ public class PlayerBallControl : NetworkBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        Logger.Instance.LogInfo($"OnCollisionEnter with name: {collision.gameObject.name}");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Logger.Instance.LogInfo($"OnTriggerEnter with name: {other.gameObject.name}");
+    }
+
     void Update()
     {
         if (IsClient && IsOwner)

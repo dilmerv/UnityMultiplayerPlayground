@@ -3,7 +3,6 @@
     Idle,
     Walk,
     Run,
-    Aim,
-    Shoot,
+    Punch,
     ReverseWalk,
 }

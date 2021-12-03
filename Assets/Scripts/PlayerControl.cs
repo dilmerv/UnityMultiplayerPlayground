@@ -25,14 +25,27 @@ public class PlayerControl : NetworkBehaviour
     [SerializeField]
     private NetworkVariable<PlayerState> networkPlayerState = new NetworkVariable<PlayerState>();
 
+    [SerializeField]
+    private NetworkVariable<float> punchBlend = new NetworkVariable<float>();
+
     private CharacterController characterController;
 
     // client caches positions
     private Vector3 oldInputPosition = Vector3.zero;
     private Vector3 oldInputRotation = Vector3.zero;
+
     private PlayerState oldPlayerState = PlayerState.Idle;
 
     private Animator animator;
+
+    [SerializeField]
+    private GameObject leftHand;
+
+    [SerializeField]
+    private GameObject rightHand;
+
+    [SerializeField]
+    private float minHitDistance = 1.0f;
 
     private void Awake()
     {
@@ -60,6 +73,49 @@ public class PlayerControl : NetworkBehaviour
         ClientVisuals();
     }
 
+    private void FixedUpdate()
+    {
+        if (IsClient && IsOwner)
+        {
+            if (networkPlayerState.Value == PlayerState.Punch && ActivePunchingKey())
+            {
+                CheckPunch(leftHand.transform, Vector2.up);
+                CheckPunch(rightHand.transform, Vector2.down);
+            }
+        }
+    }
+
+    private void CheckPunch(Transform transform, Vector3 aimDirecton)
+    {
+        RaycastHit hit;
+        int layerMask = LayerMask.GetMask("Player");
+
+        // Does the ray intersect any objects excluding the player layer
+        if (Physics.Raycast(transform.position, transform.TransformDirection(aimDirecton), out hit, minHitDistance, layerMask))
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(aimDirecton) * hit.distance, Color.yellow);
+            Logger.Instance.LogInfo("Did Hit: " + hit.transform.name);
+            var n = hit.transform.GetComponent<NetworkObject>();
+            if(n != null)
+                Logger.Instance.LogInfo("Did Hit NetworkObj: " + n.OwnerClientId);
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(aimDirecton) * minHitDistance, Color.white);
+            //Debug.Log("Did not Hit");
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Logger.Instance.LogInfo($"OnCollisionEnter with name: {collision.gameObject.name}");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Logger.Instance.LogInfo($"OnTriggerEnter with name: {other.gameObject.name}");
+    }
+
     private void ClientMoveAndRotate()
     {
         if (networkPositionDirection.Value != Vector3.zero)
@@ -78,6 +134,10 @@ public class PlayerControl : NetworkBehaviour
         {
             oldPlayerState = networkPlayerState.Value;
             animator.SetTrigger($"{networkPlayerState.Value}");
+            if (networkPlayerState.Value == PlayerState.Punch)
+            {
+                animator.SetFloat($"{PlayerState.Punch}Blend", punchBlend.Value);
+            }
         }
     }
 
@@ -91,7 +151,14 @@ public class PlayerControl : NetworkBehaviour
         float forwardInput = Input.GetAxis("Vertical");
         Vector3 inputPosition = direction * forwardInput;
 
-        // change animation states
+        // change punching state
+        if (ActivePunchingKey() && forwardInput == 0)
+        {
+            UpdatePlayerStateServerRpc(PlayerState.Punch);
+            return;
+        }
+
+        // change character movement
         if (forwardInput == 0)
             UpdatePlayerStateServerRpc(PlayerState.Idle);
         else if (!ActiveRunningActionKey() && forwardInput > 0 && forwardInput <= 1)
@@ -103,12 +170,13 @@ public class PlayerControl : NetworkBehaviour
         }
         else if (forwardInput < 0)
             UpdatePlayerStateServerRpc(PlayerState.ReverseWalk);
-
+        
         // let server know about position and rotation client changes
         if (oldInputPosition != inputPosition ||
             oldInputRotation != inputRotation)
         {
             oldInputPosition = inputPosition;
+            oldInputRotation = inputRotation;
             UpdateClientPositionAndRotationServerRpc(inputPosition * walkSpeed, inputRotation * rotationSpeed);
         }
     }
@@ -116,6 +184,11 @@ public class PlayerControl : NetworkBehaviour
     private static bool ActiveRunningActionKey()
     {
         return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+    }
+
+    private static bool ActivePunchingKey()
+    {
+        return Input.GetKey(KeyCode.Space);
     }
 
     [ServerRpc]
@@ -129,5 +202,9 @@ public class PlayerControl : NetworkBehaviour
     public void UpdatePlayerStateServerRpc(PlayerState state)
     {
         networkPlayerState.Value = state;
+        if (state == PlayerState.Punch)
+        {
+            punchBlend.Value = Random.Range(0.0f, 1.0f);
+        }
     }
 }

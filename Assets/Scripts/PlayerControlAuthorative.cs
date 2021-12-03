@@ -19,6 +19,9 @@ public class PlayerControlAuthorative : NetworkBehaviour
     private Vector2 defaultInitialPositionOnPlane = new Vector2(-4, 4);
 
     [SerializeField]
+    private NetworkVariable<Vector2> networkInitialPosition = new NetworkVariable<Vector2>();
+
+    [SerializeField]
     private NetworkVariable<PlayerState> networkPlayerState = new NetworkVariable<PlayerState>();
 
     private CharacterController characterController;
@@ -27,6 +30,8 @@ public class PlayerControlAuthorative : NetworkBehaviour
 
     // client caches animation states
     private PlayerState oldPlayerState = PlayerState.Idle;
+
+    private Vector2 initialPosition;
 
     private void Awake()
     {
@@ -38,10 +43,19 @@ public class PlayerControlAuthorative : NetworkBehaviour
     {
         if (IsClient && IsOwner)
         {
-            transform.position = new Vector3(Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y), 0,
+            initialPosition = new Vector3(Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y), 0,
                    Random.Range(defaultInitialPositionOnPlane.x, defaultInitialPositionOnPlane.y));
+
+            //UpdatePlayerInitialPositionServerRpc(initialPosition);
+
+            transform.position = initialPosition;
+
             PlayerCameraFollow.Instance.FollowPlayer(transform.Find("PlayerCameraRoot"));
         }
+        //else
+        //{
+        //    transform.position = networkInitialPosition.Value;
+        //}
     }
 
     void Update()
@@ -101,4 +115,11 @@ public class PlayerControlAuthorative : NetworkBehaviour
     {
         networkPlayerState.Value = state;
     }
+
+    [ServerRpc]
+    public void UpdatePlayerInitialPositionServerRpc(Vector2 initialPosition)
+    {
+        networkInitialPosition.Value = initialPosition;
+    }
+
 }
