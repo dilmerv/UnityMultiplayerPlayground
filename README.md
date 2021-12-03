@@ -8,6 +8,6 @@ YouTube tutorials in Chronogical order / features:
 * [How To Make A Game With Unity Multiplayer Netcode | Network Physics And Network Object Pooling](https://youtu.be/DfUUyEWUhwQ)
 * [How To Make A Game With Unity Multiplayer Netcode | Relay Service Setup](https://youtu.be/82Lbho7S0OA)
 * [How To Make A Game With Unity Multiplayer Netcode | Client Network Transform & 3rd Person Camera](https://youtu.be/49mnzY-MpLw)
-* How To Make A Game With Unity Multiplayer Netcode | ClientRpc And ServerRpc
+* [How To Make A Game With Unity Multiplayer Netcode | ClientRpc ClientRpcParams & ServerRpc](https://www.youtube.com/watch?v=ktGJstDvEmU)
 
 Take a look at [Unity official docs](https://docs-multiplayer.unity3d.com/docs/learn/dilmer/dilmer-video) as well with the videos above also included.
